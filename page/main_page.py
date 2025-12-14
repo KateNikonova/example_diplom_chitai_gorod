@@ -1,3 +1,4 @@
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,9 +14,29 @@ class MainPage:
     def go_to_main_page(self, url):
         self.driver.maximize_window()
         self.driver.get(url)
+        self.close_popups()
 
+    def close_popups(self):
+        """
+        Закрывает все всплывающие окна безопасно (без падения теста)
+        """
+        popup_selectors = [
+            ('.chg-app-button--primary.chg-app-button--block', 3),
+            ('[data-popmechanic-close]', 3)
+        ]
 
+        for selector, timeout in popup_selectors:
+            try:
+                element = WebDriverWait(self.driver, timeout).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
+                )
+                element.click()
 
+                WebDriverWait(self.driver, timeout).until(
+                    EC.invisibility_of_element_located((By.CSS_SELECTOR, selector))
+                )
+            except TimeoutException:
+                continue
 
     def send_search_str(self, search_str: str):
         """
