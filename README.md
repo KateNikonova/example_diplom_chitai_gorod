@@ -1,0 +1,1 @@
+# example_diplom_chitai_gorod
